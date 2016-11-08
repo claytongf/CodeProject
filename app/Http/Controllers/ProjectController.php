@@ -31,7 +31,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $this->repository->all();
+        return $this->service->all();
     }
 
     /**
@@ -53,7 +53,7 @@ class ProjectController extends Controller
      */
     public function show($id)
     {
-        return $this->repository->find($id);
+        return $this->service->find($id);
     }
 
     /**
