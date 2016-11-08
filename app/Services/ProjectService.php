@@ -54,4 +54,12 @@ class ProjectService
             ];
         }
     }
+
+    public function find($id){
+        return $this->repository->with(['owner','client'])->find($id);
+    }
+
+    public function all(){
+        return $this->repository->with(['owner','client'])->all();
+    }
 }
