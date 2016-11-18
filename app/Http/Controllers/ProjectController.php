@@ -87,6 +87,6 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
-        $this->repository->delete($id);
+        return $this->service->destroy($id);
     }
 }
