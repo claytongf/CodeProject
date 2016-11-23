@@ -77,7 +77,7 @@ class ProjectService
     public function destroy($id)
     {
         try {
-            $this->repository->findOrFail($id)->delete();
+            $this->repository->find($id)->delete();
             return ['success'=>true, "message" => 'Projeto deletado com sucesso!'];
         } catch (QueryException $e) {
             return ['error'=>true, "message" => 'Projeto não pode ser apagado pois existe um ou mais clientes vinculados a ele.'];
