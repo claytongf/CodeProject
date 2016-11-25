@@ -3,34 +3,34 @@
 namespace CodeProject\Services;
 
 
-use CodeProject\Repositories\ClientRepository;
-use CodeProject\Repositories\ProjectRepository;
-use CodeProject\Validators\ClientValidator;
-use CodeProject\Validators\ProjectValidator;
+use CodeProject\Repositories\ProjectMemberRepository;
+use CodeProject\Validators\ProjectMemberValidator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Prettus\Validator\Exceptions\ValidatorException;
 
-class ProjectService
+class ProjectMemberService
 {
     /**
-     * @var ProjectRepository
+     * @var ProjectMemberRepository
      */
     protected $repository;
     /**
-     * @var ProjectValidator
+     * @var ProjectMemberValidator
      */
     private $validator;
 
     /**
      * ClientService constructor.
-     * @param ProjectRepository $repository
-     * @param ProjectValidator $validator
+     * @param ProjectMemberRepository $memberRepository
+     * @param ProjectMemberValidator $memberValidator
+     * @internal param ProjectMemberRepository $repository
+     * @internal param ProjectMemberValidator $validator
      */
-    public function __construct(ProjectRepository $repository, ProjectValidator $validator)
+    public function __construct(ProjectMemberRepository $memberRepository, ProjectMemberValidator $memberValidator)
     {
-        $this->repository = $repository;
-        $this->validator = $validator;
+        $this->repository = $memberRepository;
+        $this->validator = $memberValidator;
     }
 
     public function create(array $data){
@@ -57,11 +57,10 @@ class ProjectService
         }
     }
 
-    public function find($id){
+    public function findWhere($id){
         try{
-            $project = $this->repository->with(['owner','client'])->find($id);
-            return $project;
-        }catch(ModelNotFoundException $e){
+            return $this->repository->findWhere(['project_id' => $id]);
+        }catch (ModelNotFoundException $e){
             return ['error' => true, "message" => "Projeto não encontrado."];
         }
     }
@@ -85,33 +84,6 @@ class ProjectService
             return ['error'=>true, "message" => 'Projeto não encontrado.'];
         } catch (\Exception $e) {
             return ['error'=>true, "message" => 'Ocorreu algum erro ao excluir o projeto.'];
-        }
-    }
-
-    public function addMember($id, $memberId){
-        try{
-            $this->repository->find($id)->members()->attach($memberId);
-            return ['success'=>true, "message" => "Membro adicionado ao projeto com sucesso!"];
-        }catch(ModelNotFoundException $e){
-            return ['error'=>true, 'message'=>'Projeto ou usuário não encontrado.'];
-        }
-    }
-
-    public function removeMember($id, $memberId){
-        try{
-            $this->repository->with(['members'])->find($id)->detach($memberId);
-            return ['success'=>true, "message" => "Membro removido do projeto com sucesso!"];
-        }catch(ModelNotFoundException $e){
-            return ['error'=>true, 'message'=>'Projeto ou usuário não encontrado.'];
-        }
-    }
-
-    public function isMember($id, $memberId){
-        try{
-            $member = $this->repository->find($id)->members()->find($memberId);
-            dd($member);
-        }catch(ModelNotFoundException $e){
-            return ['error'=>true, 'message'=>'Usuário não é membro desse projeto.'];
         }
     }
 }

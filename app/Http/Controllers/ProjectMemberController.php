@@ -2,26 +2,26 @@
 
 namespace CodeProject\Http\Controllers;
 
-use CodeProject\Repositories\ProjectNoteRepository;
-use CodeProject\Services\ProjectNoteService;
+use CodeProject\Repositories\ProjectMemberRepository;
+use CodeProject\Services\ProjectMemberService;
 use Illuminate\Http\Request;
 
-class ProjectNoteController extends Controller
+class ProjectMemberController extends Controller
 {
 
     /**
-     * @var ProjectNoteRepository
+     * @var ProjectMemberRepository
      */
     private $repository;
     /**
-     * @var ProjectNoteService
+     * @var ProjectMemberService
      */
     private $service;
 
-    public function __construct(ProjectNoteRepository $projectNoteRepository, ProjectNoteService $noteService)
+    public function __construct(ProjectMemberRepository $memberRepository, ProjectMemberService $memberService)
     {
-        $this->repository = $projectNoteRepository;
-        $this->service = $noteService;
+        $this->repository = $memberRepository;
+        $this->service = $memberService;
     }
 
     /**
@@ -50,12 +50,12 @@ class ProjectNoteController extends Controller
      * Display the specified resource.
      *
      * @param  int $id
-     * @param $noteId
+     * @param $memberId
      * @return \Illuminate\Http\Response
      */
-    public function show($id, $noteId)
+    public function show($id, $memberId)
     {
-        return $this->service->findWhere(['project_id'=>$id, 'id'=>$noteId]);
+        return $this->service->findWhere(['project_id'=>$id, 'id'=>$memberId]);
     }
 
     /**
@@ -74,23 +74,23 @@ class ProjectNoteController extends Controller
      *
      * @param  \Illuminate\Http\Request $request
      * @param  int $id
-     * @param $noteId
+     * @param $memberId
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id, $noteId)
+    public function update(Request $request, $id, $memberId)
     {
-        return $this->service->update($request->all(), $noteId);
+        return $this->service->update($request->all(), $memberId);
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  int $id
-     * @param $noteId
+     * @param $memberId
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id, $noteId)
+    public function destroy($id, $memberId)
     {
-        return $this->service->destroy($noteId);
+        return $this->service->destroy($memberId);
     }
 }

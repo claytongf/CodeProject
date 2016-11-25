@@ -57,11 +57,10 @@ class ProjectNoteService
         }
     }
 
-    public function find($id){
+    public function findWhere($id){
         try{
-            $project = $this->repository->with(['owner','client'])->find($id);
-            return $project;
-        }catch(ModelNotFoundException $e){
+            return $this->repository->findWhere(['project_id' => $id['project_id']]);
+        }catch (ModelNotFoundException $e){
             return ['error' => true, "message" => "Projeto não encontrado."];
         }
     }

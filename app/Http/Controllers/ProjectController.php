@@ -89,4 +89,16 @@ class ProjectController extends Controller
     {
         return $this->service->destroy($id);
     }
+
+    public function addMember($id, $memberId){
+        return $this->service->addMember($id, $memberId);
+    }
+
+    public function removeMember($id, $memberId){
+        return $this->service->removeMember($id, $memberId);
+    }
+
+    public function isMember($id, $memberId){
+        return $this->service->isMember($id, $memberId);
+    }
 }
