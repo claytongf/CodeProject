@@ -88,28 +88,31 @@ class ProjectService
         }
     }
 
-    public function addMember($id, $memberId){
+    public function addMember($projectId, $memberId){
         try{
-            $this->repository->find($id)->members()->attach($memberId);
+            $this->repository->find($projectId)->members()->attach($memberId);
             return ['success'=>true, "message" => "Membro adicionado ao projeto com sucesso!"];
         }catch(ModelNotFoundException $e){
             return ['error'=>true, 'message'=>'Projeto ou usuário não encontrado.'];
         }
     }
 
-    public function removeMember($id, $memberId){
+    public function removeMember($projectId, $memberId){
         try{
-            $this->repository->with(['members'])->find($id)->detach($memberId);
+            $this->repository->with(['members'])->find($projectId)->detach($memberId);
             return ['success'=>true, "message" => "Membro removido do projeto com sucesso!"];
         }catch(ModelNotFoundException $e){
             return ['error'=>true, 'message'=>'Projeto ou usuário não encontrado.'];
         }
     }
 
-    public function isMember($id, $memberId){
+    public function isMember($projectId, $memberId){
         try{
-            $member = $this->repository->find($id)->members()->find($memberId);
-            dd($member);
+            $member = $this->repository->find($projectId)->members()->find(['user_id'=>$memberId]);
+            if(count($member)){
+                return ['success'=>true, "message"=>"Usuário é membro do projeto"];
+            }
+            return ['error'=>true, 'message'=>'Usuário não é membro desse projeto.'];
         }catch(ModelNotFoundException $e){
             return ['error'=>true, 'message'=>'Usuário não é membro desse projeto.'];
         }
