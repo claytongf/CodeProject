@@ -59,7 +59,7 @@ class ProjectTaskService
 
     public function findWhere($id){
         try{
-            return $this->repository->findWhere(['project_id' => $id['project_id']]);
+            return $this->repository->findWhere(['project_id' => $id]);
         }catch (ModelNotFoundException $e){
             return ['error' => true, "message" => "Projeto não encontrado."];
         }
