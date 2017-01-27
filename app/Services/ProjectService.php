@@ -2,14 +2,14 @@
 
 namespace CodeProject\Services;
 
-
-use CodeProject\Repositories\ClientRepository;
 use CodeProject\Repositories\ProjectRepository;
-use CodeProject\Validators\ClientValidator;
 use CodeProject\Validators\ProjectValidator;
+use LucaDegasperi\OAuth2Server\Facades\Authorizer;
+use Prettus\Validator\Exceptions\ValidatorException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
-use Prettus\Validator\Exceptions\ValidatorException;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Contracts\Filesystem\Factory as Storage;
 
 class ProjectService
 {
@@ -21,16 +21,28 @@ class ProjectService
      * @var ProjectValidator
      */
     private $validator;
+    /**
+     * @var Filesystem
+     */
+    private $filesystem;
+    /**
+     * @var Storage
+     */
+    private $storage;
 
     /**
      * ClientService constructor.
      * @param ProjectRepository $repository
      * @param ProjectValidator $validator
+     * @param Filesystem $filesystem
+     * @param Storage $storage
      */
-    public function __construct(ProjectRepository $repository, ProjectValidator $validator)
+    public function __construct(ProjectRepository $repository, ProjectValidator $validator, Filesystem $filesystem, Storage $storage)
     {
         $this->repository = $repository;
         $this->validator = $validator;
+        $this->filesystem = $filesystem;
+        $this->storage = $storage;
     }
 
     public function create(array $data){
@@ -64,6 +76,11 @@ class ProjectService
         }catch(ModelNotFoundException $e){
             return ['error' => true, "message" => "Projeto não encontrado."];
         }
+    }
+
+    public function findWhere($id){
+        $project = $this->repository->with(['owner','client'])->findWhere(['owner_id'=>$id]);
+        return $project;
     }
 
     public function all(){
@@ -107,14 +124,37 @@ class ProjectService
     }
 
     public function isMember($projectId, $memberId){
-        try{
-            $member = $this->repository->find($projectId)->members()->find(['user_id'=>$memberId]);
-            if(count($member)){
-                return ['success'=>true, "message"=>"Usuário é membro do projeto"];
-            }
-            return ['error'=>true, 'message'=>'Usuário não é membro desse projeto.'];
-        }catch(ModelNotFoundException $e){
-            return ['error'=>true, 'message'=>'Usuário não é membro desse projeto.'];
+        $member = $this->repository->find($projectId)->members()->find(['user_id'=>$memberId]);
+        if(count($member)){
+            return true;
         }
+        return false;
+    }
+
+    public function createFile(array $data){
+        // name
+        // description
+        // extension
+        // file
+        $project = $this->repository->skipPresenter()->find($data['project_id']);
+        $projectFile = $project->files()->create($data);
+        $this->storage->put($projectFile->id.".".$data['extension'], $this->filesystem->get($data['file']));
+    }
+
+    public function checkProjectOwner($projectId){
+        $userId = Authorizer::getResourceOwnerId();
+        return $this->repository->isOwner($projectId, $userId);
+    }
+
+    public function checkProjectMember($projectId){
+        $userId = Authorizer::getResourceOwnerId();
+        return $this->service->isMember($projectId, $userId);
+    }
+
+    public function checkProjectPermissions($projectId){
+        if($this->checkProjectOwner($projectId) || $this->checkProjectMember($projectId)){
+            return true;
+        }
+        return false;
     }
 }

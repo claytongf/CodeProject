@@ -5,9 +5,11 @@ namespace CodeProject\Http\Controllers;
 use CodeProject\Repositories\ProjectRepository;
 use CodeProject\Services\ProjectService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use LucaDegasperi\OAuth2Server\Facades\Authorizer;
 
-class ProjectController extends Controller
+class ProjectFileController extends Controller
 {
 
     /**
@@ -43,7 +45,16 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        return $this->service->create($request->all());
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
+        $data['file'] = $file;
+        $data['extension'] = $extension;
+        $data['name'] = $request->name;
+        $data['project_id'] = $request->project_id;
+        $data['description'] = $request->description;
+
+        $this->service->createFile($data);
+
     }
 
     /**
@@ -94,21 +105,9 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
-        if($this->checkProjectOwner($id)==false){
+        if($this->service->check($id)==false){
             return ['error'=>'Access forbidden'];
         }
         return $this->service->destroy($id);
-    }
-
-    public function addMember($id, $memberId){
-        return $this->service->addMember($id, $memberId);
-    }
-
-    public function removeMember($id, $memberId){
-        return $this->service->removeMember($id, $memberId);
-    }
-
-    public function isMember($id, $memberId){
-        return $this->service->isMember($id, $memberId);
     }
 }
